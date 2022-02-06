@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 
 const userRoutes = require('./routes/user');
-
+const saucesRoutes = require('./routes/sauces');
 
 
 
@@ -32,5 +32,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json()); 
 
 app.use('/api/auth', userRoutes);
+app.use('/api/sauces', saucesRoutes);
+
 
 module.exports = app; 
