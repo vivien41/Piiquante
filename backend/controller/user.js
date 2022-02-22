@@ -33,7 +33,7 @@ exports.signup = (req, res, next) => {
   if (!passwordSchema.validate(req.body.password)) {
     return res.status(401).json({
       message:
-        "Le mot de passe doit avoir au minimum 8 à 20 caractères avec au minimum 1 chiffre, 1 minuscule et 1 majuscule et ne doit pas contenir d'espace.",
+      "Le mot de passe doit avoir au minimum 8 à 20 caractères avec au minimum 1 chiffre, 1 minuscule et 1 majuscule et ne doit pas contenir d'espace.",
     });
   }
   bcrypt
@@ -54,25 +54,35 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-  User.findOne({ email: req.body.email })
-    .then((user) => {
-      if (!user) {
-        return res.status(401).json({ message: "Utilisateur non trouvé" });
-      }
-      bcrypt
-        .compare(req.body.password, user.password)
-        .then((valid) => {
-          if (!valid) {
-            return res.status(401).json({ message: "Mot de passe incorrect" });
-          }
-          res.status(200).json({
-            userId: user._id,
-            token: jwt.sign({ userId: user._id }, process.env.TOKEN, {
-              expiresIn: "24h",
-            }),
-          });
+
+    /*recherche le champs email dans la requete */
+    User.findOne({ email: req.body.email })
+        .then(user => {
+            if (!user) {
+                return res.status(401).json({ error: 'Utilisateur non trouvé !' });
+            }
+
+            /* si utilisateur existe */
+            bcrypt.compare(req.body.password, user.password)
+                .then(pass => {
+
+            /* si mot de passe incorrect */
+              if (!pass) {
+                return res.status(401).json({ error: 'Mot de passe incorrect !'})
+              }
+              const newToken = jwt.sign(
+                { userId: user._id }, 
+                `${process.env.RND_TOKEN}`, 
+                  { expiresIn: '24h' })
+
+              res.setHeader('Authorization', 'Bearer '+ newToken);
+                    
+              res.status(200).json({
+              userId: user._id,
+              token: newToken})
+                    
+                })
+        .catch(error => res.status(500).json({ error }))
         })
-        .catch((error) => res.status(500).json({ error }));
-    })
-    .catch((error) => res.status(500).json({ error }));
+        .catch(error => res.status(500).json({ error }))
 };
