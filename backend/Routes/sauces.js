@@ -1,13 +1,13 @@
-const mongoose = require('mongoose');
+const express = require("express");
+const router = express.Router()
+const saucesCtrl = require("../controller/sauces");
+const auth = require('../middleware/authorization'); // middleware qui permet d'authentifier les pages de l'application
+const multer = require("../middleware/multer");
 
-const sauceSchema = mongoose.Schema({
-  userId: { type: String, required: true },
-  name: { type: String, required: true },
-  manufacturer: { type: String, required: true },
-  description: { type: String, required: true },
-  mainPepper: { type: String, required: true },
-  imageUrl: { type: String, required: true },
-  heat: { type: Number, required: true },
-});
+router.post("/", multer, saucesCtrl.createSauces);
+router.put("/:id", auth, saucesCtrl.modifySauces);
+router.delete("/:id", auth, saucesCtrl.deleteSauces);
+router.get("/", auth, saucesCtrl.getAllSauces);
+router.get("/:id", auth, saucesCtrl.getOneSauces);
 
-module.exports = mongoose.model('Sauce', sauceSchema);
+module.exports = router;
