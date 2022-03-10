@@ -1,26 +1,10 @@
 const User = require("../models/user");
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const emailValidator = require('email-validator');
-const passwordValidator = require('password-validator');
+const passwordSchema = require("../models/password");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const emailValidator = require("email-validator");
+const passwordValidator = require("password-validator");
 require('dotenv').config();
-
-const passwordSchema = new passwordValidator();
-
-passwordSchema
-  .is()
-  .min(8)
-  .is()
-  .max(20)
-  .has()
-  .uppercase()
-  .has()
-  .lowercase()
-  .has()
-  .digits()
-  .has()
-  .not()
-  .spaces();
 
 
 exports.signup = (req, res, next) => {
@@ -53,29 +37,29 @@ exports.signup = (req, res, next) => {
     .catch((error) => res.status(500).json({ error }));
 };
 
-exports.login = (req, res, next) => {
+/* exports.login = (req, res, next) => {
 
-    /*recherche le champs email dans la requete */
+    recherche le champs email dans la requete 
     User.findOne({ email: req.body.email })
         .then(user => {
             if (!user) {
-                return res.status(401).json({ error: 'Utilisateur non trouvé !' });
+                return res.status(401).json({ error: "Utilisateur non trouvé !" });
             }
 
-            /* si utilisateur existe */
+             si utilisateur existe 
             bcrypt.compare(req.body.password, user.password)
                 .then(pass => {
 
-            /* si mot de passe incorrect */
+            si mot de passe incorrect 
               if (!pass) {
-                return res.status(401).json({ error: 'Mot de passe incorrect !'})
+                return res.status(401).json({ error: "Mot de passe incorrect !"})
               }
               const newToken = jwt.sign(
                 { userId: user._id }, 
                 `${process.env.RND_TOKEN}`, 
-                  { expiresIn: '24h' })
+                  { expiresIn: "24h" })
 
-              res.setHeader('Authorization', 'Bearer '+ newToken);
+              res.setHeader("authorization", "Bearer "+ newToken);
                     
               res.status(200).json({
               userId: user._id,
@@ -85,4 +69,48 @@ exports.login = (req, res, next) => {
         .catch(error => res.status(500).json({ error }))
         })
         .catch(error => res.status(500).json({ error }))
-};
+}; */
+
+exports.login = (req, res, next) => {
+
+  User.findOne({
+    email: req.body.email,
+})
+    .then((user) => {
+        if (!user) {
+            return res.status(401).json({
+                error: "Utilisateur non trouvé !",
+            });
+        }
+        bcrypt.compare(req.body.password, user.password)
+            .then((valid) => {
+                if (!valid) {
+                    return res.status(401).json({
+                        error: "Mot de passe incorrect !",
+                    });
+                }
+                res.status(200).json({
+                    userId: user._id,
+                    token: jwt.sign(
+                        {
+                            userId: user._id,
+                        },
+                        process.env.MONTOKEN,
+                        {
+                            expiresIn: "24h",
+                        }
+                    ),
+                });
+            })
+            .catch((error) =>
+                res.status(500).json({
+                    error,
+                })
+            );
+    })
+    .catch((error) =>
+        res.status(500).json({
+            error,
+        })
+    );
+    }
