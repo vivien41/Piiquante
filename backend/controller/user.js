@@ -37,40 +37,6 @@ exports.signup = (req, res, next) => {
     .catch((error) => res.status(500).json({ error }));
 };
 
-/* exports.login = (req, res, next) => {
-
-    recherche le champs email dans la requete 
-    User.findOne({ email: req.body.email })
-        .then(user => {
-            if (!user) {
-                return res.status(401).json({ error: "Utilisateur non trouvé !" });
-            }
-
-             si utilisateur existe 
-            bcrypt.compare(req.body.password, user.password)
-                .then(pass => {
-
-            si mot de passe incorrect 
-              if (!pass) {
-                return res.status(401).json({ error: "Mot de passe incorrect !"})
-              }
-              const newToken = jwt.sign(
-                { userId: user._id }, 
-                `${process.env.RND_TOKEN}`, 
-                  { expiresIn: "24h" })
-
-              res.setHeader("authorization", "Bearer "+ newToken);
-                    
-              res.status(200).json({
-              userId: user._id,
-              token: newToken})
-                    
-                })
-        .catch(error => res.status(500).json({ error }))
-        })
-        .catch(error => res.status(500).json({ error }))
-}; */
-
 exports.login = (req, res, next) => {
 
   User.findOne({
@@ -89,6 +55,7 @@ exports.login = (req, res, next) => {
                         error: "Mot de passe incorrect !",
                     });
                 }
+
                 res.status(200).json({
                     userId: user._id,
                     token: jwt.sign(
@@ -113,4 +80,4 @@ exports.login = (req, res, next) => {
             error,
         })
     );
-    }
+    } 
