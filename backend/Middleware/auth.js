@@ -7,11 +7,10 @@ module.exports = (req, res, next) => {
         const decodedToken = jwt.verify(token, process.env.MONTOKEN); 
         console.log(decodedToken)
         const userId = decodedToken.userId;
-    /*Ajout de 'userId' à l'objet requete => L'ajout d'un attribut à l'objet req le rend accessible à tout les middleware */
-    req.auth = { userId: userId };
+   
     /* Vérifier si 'userId' de la requête correspond à celui du token */
     if (req.body.userId && req.body.userId !== userId) {
-      throw "User ID non valable";
+      res.status(403).json({ message: 'Requête non autorisée' });
     } else {
       next();
     }
